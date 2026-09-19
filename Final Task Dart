@@ -73,7 +73,7 @@ bool bookSlot(String requestedTime) {
 
 void main() {
   print("=======================================");
-print("        WELCOME TO THE AHSAN SALON       ");
+print("        WELCOME TO THE SALON       ");
   print("=======================================");
 
   // 1. Interactive Service Selection
