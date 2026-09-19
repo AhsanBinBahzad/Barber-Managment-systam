@@ -1,0 +1,152 @@
+import 'dart:io';
+
+class BarberService {
+  String name;
+  double price;
+  int durationInMinutes;
+
+  BarberService({
+    required this.name,
+    required this.price,
+    required this.durationInMinutes,
+  });
+}
+
+class TimeSlot {
+  String time;
+  bool isBooked;
+
+  TimeSlot({required this.time, this.isBooked = false});
+}
+
+// Master Lists & Cart
+List<BarberService> availableServices = [
+  BarberService(name: "Haircut", price: 600, durationInMinutes: 30),
+  BarberService(name: "Facial", price: 800, durationInMinutes: 45),
+  BarberService(name: "Shave", price: 200, durationInMinutes: 15),
+  BarberService(name: "Hair Color", price: 1000, durationInMinutes: 60),
+];
+
+List<TimeSlot> availableSlots = [
+  TimeSlot(time: "10:00 AM", isBooked: false),
+  TimeSlot(time: "11:00 AM", isBooked: true), // Pre-booked
+  TimeSlot(time: "12:00 PM", isBooked: false),
+  TimeSlot(time: "02:00 PM", isBooked: false),
+];
+
+List<BarberService> myCart = [];
+
+// Functions
+void addToCart(int index) {
+  if (index >= 0 && index < availableServices.length) {
+    BarberService selectedService = availableServices[index];
+    myCart.add(selectedService);
+    print("\n '${selectedService.name}' has been added to your cart!");
+  } else {
+    print("\n Invalid Selection. Please choose a valid number.");
+  }
+}
+
+double calculateDiscountBill(double total) {
+  if (total >= 1000) {
+    return total - (total * 0.10); // 10% discount
+  }
+  return total;
+}
+
+bool bookSlot(String requestedTime) {
+  for (var slot in availableSlots) {
+    if (slot.time == requestedTime) {
+      if (!slot.isBooked) {
+        slot.isBooked = true;
+        print("\n SUCCESS: Slot '$requestedTime' is successfully booked!");
+        return true;
+      } else {
+        print("\n ERROR: Slot '$requestedTime' is ALREADY BOOKED.");
+        return false;
+      }
+    }
+  }
+  print("\n ERROR: Invalid Time Slot.");
+  return false;
+}
+
+void main() {
+  print("=======================================");
+print("        WELCOME TO THE AHSAN SALON       ");
+  print("=======================================");
+
+  // 1. Interactive Service Selection
+  while (true) {
+    print("\n--- AVAILABLE SERVICES ---");
+    for (int i = 0; i < availableServices.length; i++) {
+      print("${i + 1}. ${availableServices[i].name} - Rs. ${availableServices[i].price} (${availableServices[i].durationInMinutes} mins)");
+    }
+    print("0. Done Selecting Services (Go to Checkout)");
+
+    stdout.write("\nEnter service number to add to cart: ");
+    String? input = stdin.readLineSync();
+    int? choice = int.tryParse(input ?? "");
+
+    if (choice == 0) {
+      if (myCart.isEmpty) {
+        print("\n Your cart is empty! Please select at least one service.");
+        continue;
+      }
+      break;
+    } else if (choice != null) {
+      addToCart(choice - 1); // User enters 1-based index, list uses 0-based
+    } else {
+      print("\n Please enter a valid number.");
+    }
+  }
+
+  // 2. Receipt & Calculation Display
+  print("\n=======================================");
+  print("            YOUR RECEIPT               ");
+  print("=======================================");
+  double totalPrice = 0;
+  int totalTime = 0;
+
+  for (var service in myCart) {
+    print("- ${service.name} : Rs. ${service.price}");
+    totalPrice += service.price;
+    totalTime += service.durationInMinutes;
+  }
+
+  print("---------------------------------------");
+  print("Total Gross Price : Rs. $totalPrice");
+  print("Total Estimated Time: $totalTime minutes");
+
+  double finalBill = calculateDiscountBill(totalPrice);
+  if (totalPrice >= 1000) {
+    print("Discount Applied   : 10% OFF");
+  }
+  print("Final Payable Bill : Rs. $finalBill");
+  print("=======================================");
+
+  // 3. Interactive Time Slot Booking
+  while (true) {
+    print("\n--- AVAILABLE TIME SLOTS ---");
+    for (int i = 0; i < availableSlots.length; i++) {
+      String status = availableSlots[i].isBooked ? "[ BOOKED ]" : "[ AVAILABLE ]";
+      print("${i + 1}. ${availableSlots[i].time} $status");
+    }
+
+    stdout.write("\nEnter slot number to book: ");
+    String? slotInput = stdin.readLineSync();
+    int? slotChoice = int.tryParse(slotInput ?? "");
+
+    if (slotChoice != null && slotChoice >= 1 && slotChoice <= availableSlots.length) {
+      String selectedTime = availableSlots[slotChoice - 1].time;
+      bool isSuccess = bookSlot(selectedTime);
+      if (isSuccess) break; // Exit loop if booking succeeds
+    } else {
+      print("\n Invalid choice! Please select a valid slot number.");
+    }
+  }
+
+  print("\n=======================================");
+  print("  THANK YOU! YOUR APPOINTMENT IS SET   ");
+  print("=======================================");
+}
